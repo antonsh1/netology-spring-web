@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class RequestParametersGenerator {
+public class RequestParametersExtractor {
 
     private final Request request;
-    public RequestParametersGenerator(Request request) {
+    public RequestParametersExtractor(Request request) {
         this.request = request;
     }
 
