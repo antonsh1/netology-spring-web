@@ -1,5 +1,7 @@
 package ru.smartjava.handlers;
 
+import ru.smartjava.classes.Request;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,6 +34,7 @@ public class RequestHandler implements Runnable {
             // must be in form GET /path HTTP/1.1
             final String requestLine = in.readLine();
             final var parts = requestLine.split(" ");
+
             if (parts.length != 3) {
                 System.out.println("Не 3 части");
                 out.write((
