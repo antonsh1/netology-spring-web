@@ -29,18 +29,32 @@ public class RequestParametersExtractor {
         try {
             return Files.size(getFilePath());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return 0;
+//            throw new RuntimeException(e);
         }
     }
 
     public String getHeader() {
+        if(getFileSize() !=0 ) {
+            return "HTTP/1.1 200 OK\r\n" +
+                    "Content-Type: " + getMimeType() + "\r\n" +
+                    "Content-Length: " + getFileSize() + "\r\n" +
+                    "Connection: close\r\n" +
+                    "\r\n";
+        } else {
+            return  "HTTP/1.1 404 Not Found\r\n" +
+                    "Content-Length: 0\r\n" +
+                    "Connection: close\r\n" +
+                    "\r\n";
+        }
+
+    }
+
+    public String getEmptyHeader() {
         return "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: " + getMimeType() + "\r\n" +
-                "Content-Length: " + getFileSize() + "\r\n" +
                 "Connection: close\r\n" +
                 "\r\n";
     }
-
     public String getFileContent() {
         try {
             return Files.readString(getFilePath());
