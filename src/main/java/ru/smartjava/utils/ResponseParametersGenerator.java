@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class RequestParametersExtractor {
+public class ResponseParametersGenerator {
 
     private final Request request;
-    public RequestParametersExtractor(Request request) {
+    public ResponseParametersGenerator(Request request) {
         this.request = request;
     }
 
@@ -34,7 +34,7 @@ public class RequestParametersExtractor {
         }
     }
 
-    public String getHeader() {
+    public String getResponseHeader() {
         if(getFileSize() !=0 ) {
             return "HTTP/1.1 200 OK\r\n" +
                     "Content-Type: " + getMimeType() + "\r\n" +
@@ -50,8 +50,9 @@ public class RequestParametersExtractor {
 
     }
 
-    public String getEmptyHeader() {
+    public String getSimpleOkHeader() {
         return "HTTP/1.1 200 OK\r\n" +
+                "Content-Length: 0\r\n" +
                 "Connection: close\r\n" +
                 "\r\n";
     }

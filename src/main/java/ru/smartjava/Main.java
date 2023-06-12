@@ -4,7 +4,7 @@ package ru.smartjava;
 
 import ru.smartjava.init.Methods;
 import ru.smartjava.server.Server;
-import ru.smartjava.utils.RequestParametersExtractor;
+import ru.smartjava.utils.ResponseParametersGenerator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,9 +17,9 @@ public class Main {
 
         Server server = new Server();
         server.addHandler(Methods.GET, "/index.html", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             try {
-                out.write((rpe.getHeader()).getBytes());
+                out.write((rpe.getResponseHeader()).getBytes());
                 Files.copy(rpe.getFilePath(), out);
                 out.flush();
             } catch (IOException e) {
@@ -28,10 +28,12 @@ public class Main {
         });
 
         server.addHandler(Methods.GET, "/default-get", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             try {
-                out.write((rpe.getHeader()).getBytes());
-                Files.copy(rpe.getFilePath(), out);
+                out.write((rpe.getResponseHeader()).getBytes());
+                if (!rpe.getResponseHeader().contains("Not Found")) {
+                    Files.copy(rpe.getFilePath(), out);
+                }
                 out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -39,10 +41,10 @@ public class Main {
         });
 
         server.addHandler(Methods.GET, "/default-post", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             try {
-                out.write((rpe.getHeader()).getBytes());
-                if (!rpe.getHeader().contains("Not Found")) {
+                out.write((rpe.getResponseHeader()).getBytes());
+                if (!rpe.getResponseHeader().contains("Not Found")) {
                     Files.copy(rpe.getFilePath(), out);
                 }
                 out.flush();
@@ -52,20 +54,17 @@ public class Main {
         });
 
         server.addHandler(Methods.POST, "/messages", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
-
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             if (request.getQueryParams() != null) {
-                System.out.println("GET Params = " + request.getQueryParams());
-                System.out.println("GET value = " + request.getParams("value"));
+                System.out.println("URL Params = " + request.getQueryParams());
+                System.out.println("URL Param = value " + request.getParams("value"));
             }
             if (request.getBodyQueryParams() != null) {
-                System.out.println("POST Params = " + request.getBodyQueryParams());
-                System.out.println("POST value = " + request.getBodyParams("value"));
+                System.out.println("BODY Params = " + request.getBodyQueryParams());
+                System.out.println("BODY Param = value " + request.getBodyParams("value"));
             }
-//            System.out.println("Body: " + request.getBody());
-
             try {
-                out.write((rpe.getEmptyHeader()).getBytes());
+                out.write((rpe.getSimpleOkHeader()).getBytes());
                 out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -73,13 +72,14 @@ public class Main {
         });
 
         server.addHandler(Methods.GET, "/messages", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             if (request.getQueryParams() != null) {
-                System.out.println("GET Params = " + request.getQueryParams());
-                System.out.println("GET value = " + request.getParams("value"));
+                System.out.println("URL Params = " + request.getQueryParams());
+                System.out.println("URL Param = title " + request.getParams("title"));
+                System.out.println("URL Param = value " + request.getParams("value"));
             }
             try {
-                out.write((rpe.getEmptyHeader()).getBytes());
+                out.write((rpe.getSimpleOkHeader()).getBytes());
                 out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -87,13 +87,13 @@ public class Main {
         });
 
         server.addHandler(Methods.GET, "/classic.html", (request, out) -> {
-            RequestParametersExtractor rpe = new RequestParametersExtractor(request);
+            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             final var content = rpe.getFileContent().replace(
                     "{time}",
                     LocalDateTime.now().toString()
             ).getBytes();
             try {
-                out.write((rpe.getHeader()).getBytes());
+                out.write((rpe.getResponseHeader()).getBytes());
                 out.write(content);
                 out.flush();
             } catch (IOException e) {
