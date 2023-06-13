@@ -63,6 +63,7 @@ public class Main {
                 System.out.println("BODY Params = " + request.getBodyQueryParams());
                 System.out.println("BODY Param = value " + request.getBodyParams("value"));
             }
+            request.test();
             try {
                 out.write((rpe.getSimpleOkHeader()).getBytes());
                 out.flush();

@@ -1,12 +1,22 @@
 package ru.smartjava.classes;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.MultipartStream;
+import org.apache.commons.fileupload.ParameterParser;
+import org.apache.commons.fileupload.UploadContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.w3c.dom.ls.LSOutput;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,7 +69,8 @@ public class Request {
     public void printHeader(String header) {
         extractHeader(header).ifPresent(System.out::println);
     }
-    public List<NameValuePair> getQueryParams()  {
+
+    public List<NameValuePair> getQueryParams() {
         try {
             return URLEncodedUtils.parse(new URI(requestLine.split(" ")[1]).getQuery(), StandardCharsets.UTF_8);
         } catch (URISyntaxException ignored) {
@@ -67,24 +78,60 @@ public class Request {
         }
         return null;
     }
-    public List<NameValuePair> getBodyQueryParams()  {
-        if(extractHeader("Content-Type").isPresent()) {
-            if(extractHeader("Content-Type").get().contains("text/plain") || extractHeader("Content-Type").get().contains("application/x-www-form-urlencoded")) {
-                    return URLEncodedUtils.parse(body.replace("\r\n","&"), StandardCharsets.UTF_8);
+
+    public List<NameValuePair> getBodyQueryParams() {
+        if (extractHeader("Content-Type").isPresent()) {
+            if (extractHeader("Content-Type").get().contains("text/plain") || extractHeader("Content-Type").get().contains("application/x-www-form-urlencoded")) {
+                return URLEncodedUtils.parse(body.replace("\r\n", "&"), StandardCharsets.UTF_8);
             }
         }
         return null;
     }
 
-    public List<String> getBodyParams(String name)  {
-        if(getQueryParams() != null) {
+    public List<String> getBodyParams(String name) {
+        if (getQueryParams() != null) {
             return getBodyQueryParams().stream().filter(pair -> Objects.equals(pair.getName(), name)).map(NameValuePair::getValue).collect(Collectors.toList());
         }
         return null;
     }
 
-    public List<String> getParams(String name)  {
-        if(getQueryParams() != null) {
+    public void test() {
+        ByteArrayInputStream content = new ByteArrayInputStream(body.getBytes());
+        if (extractHeader("Content-Type").isPresent()
+                && extractHeader("Content-Type").get().contains("multipart/form-data")
+                && extractHeader("Content-Type").get().contains("boundary")
+        ) {
+            byte[] boundary = extractHeader("Content-Type").get().split("=")[1].trim().getBytes();
+            System.out.println(new String(boundary));
+            char[] splitChars = {'=',';'};
+            System.out.println("------------------------------------------------");
+            @SuppressWarnings("deprecation")
+            MultipartStream multipartStream =
+                    new MultipartStream(content, boundary);
+            try {
+                boolean nextPart = multipartStream.skipPreamble();
+                while (nextPart) {
+                    String header = multipartStream.readHeaders();
+                    ParameterParser pp = new ParameterParser();
+                    Map<String,String> parsed = pp.parse(header, splitChars);
+                    parsed.forEach((key, value) -> System.out.println("Key " + key));
+                    parsed.forEach((key, value) -> System.out.println("Value " + value));
+                    System.out.println();
+                    System.out.println("Headers:");
+                    System.out.println(header);
+                    System.out.println("Body:");
+                    multipartStream.readBodyData(System.out);
+                    System.out.println();
+                    nextPart = multipartStream.readBoundary();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public List<String> getParams(String name) {
+        if (getQueryParams() != null) {
             return getQueryParams().stream().filter(pair -> Objects.equals(pair.getName(), name)).map(NameValuePair::getValue).collect(Collectors.toList());
         }
         return null;
