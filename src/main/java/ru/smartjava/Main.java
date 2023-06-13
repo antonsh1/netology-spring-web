@@ -55,13 +55,13 @@ public class Main {
 
         server.addHandler(Methods.POST, "/messages", (request, out) -> {
             ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
-            if (request.getQueryParams() != null) {
-                System.out.println("URL Params = " + request.getQueryParams());
-                System.out.println("URL Param = value " + request.getParams("value"));
+            if (request.getParams() != null) {
+                System.out.println("URL Params = " + request.getParams());
+                System.out.println("URL Param = value " + request.getParam("value"));
             }
-            if (request.getBodyQueryParams() != null) {
-                System.out.println("BODY Params = " + request.getBodyQueryParams());
-                System.out.println("BODY Param = value " + request.getBodyParams("value"));
+            if (request.getPostParams() != null) {
+                System.out.println("BODY Params = " + request.getPostParams());
+                System.out.println("BODY Param = value " + request.getPostParam("value"));
             }
             try {
                 out.write((rpe.getSimpleOkHeader()).getBytes());
@@ -73,10 +73,10 @@ public class Main {
 
         server.addHandler(Methods.GET, "/messages", (request, out) -> {
             ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
-            if (request.getQueryParams() != null) {
-                System.out.println("URL Params = " + request.getQueryParams());
-                System.out.println("URL Param = title " + request.getParams("title"));
-                System.out.println("URL Param = value " + request.getParams("value"));
+            if (request.getParams() != null) {
+                System.out.println("URL Params = " + request.getParams());
+                System.out.println("URL Param = title " + request.getParam("title"));
+                System.out.println("URL Param = value " + request.getParam("value"));
             }
             try {
                 out.write((rpe.getSimpleOkHeader()).getBytes());
