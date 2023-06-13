@@ -27,20 +27,7 @@ public class Main {
             }
         });
 
-        server.addHandler(Methods.GET, "/default-get", (request, out) -> {
-            ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
-            try {
-                out.write((rpe.getResponseHeader()).getBytes());
-                if (!rpe.getResponseHeader().contains("Not Found")) {
-                    Files.copy(rpe.getFilePath(), out);
-                }
-                out.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        server.addHandler(Methods.GET, "/default-post", (request, out) -> {
+        server.addHandler(Methods.GET, "/default-", (request, out) -> {
             ResponseParametersGenerator rpe = new ResponseParametersGenerator(request);
             try {
                 out.write((rpe.getResponseHeader()).getBytes());
